@@ -6,7 +6,7 @@
 /*   By: aclakhda <aclakhda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 00:00:00 by aclakhda          #+#    #+#             */
-/*   Updated: 2025/10/11 20:37:49 by aclakhda         ###   ########.fr       */
+/*   Updated: 2025/10/18 21:05:26 by aclakhda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,26 @@
 
 #define MAX_CLIENTS 100
 #define BUFFER_SIZE 512
+
+
+class Server
+{
+	private:
+		int								port;
+		std::string						password;
+		int								server_fd;
+		pollfd							server_poll;
+		std::vector<pollfd>				fds; //for the polling
+		std::map<int, Client>			clients; // fd -> cleint
+		// std::map<std::string, Channel>	channels;
+		struct sockaddr_in				server_addr;
+	private:
+		int	recv_data(int client_fd, int i);
+	public:
+		Server(int port, const std::string& password);
+		~Server();
+		void	run();
+};
 
 
 #endif

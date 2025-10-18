@@ -6,12 +6,12 @@
 #    By: aclakhda <aclakhda@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/23 00:00:00 by aclakhda          #+#    #+#              #
-#    Updated: 2025/09/27 14:41:04 by aclakhda         ###   ########.fr        #
+#    Updated: 2025/10/17 21:00:09 by aclakhda         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-SRC = src/main.cpp
-	#   src/Server.cpp \
+SRC = src/main.cpp \
+	src/Server.cpp \
 	#   src/Client.cpp \
 	#   src/Channel.cpp \
 	#   src/Commands.cpp \
@@ -44,10 +44,13 @@ re: fclean all
 test: $(NAME)
 	@./$(NAME) 6667 password
 
+c:
+	nc localhost 6667
+
 debug: FLAGS += -g -DDEBUG
 debug: re
 
 valgrind: $(NAME)
 	@valgrind --leak-check=full --show-leak-kinds=all ./$(NAME) 6667 password
 
-.PHONY: all clean fclean re test debug valgrind
+.PHONY: all clean fclean re test debug valgrind c

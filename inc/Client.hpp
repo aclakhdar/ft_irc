@@ -6,7 +6,7 @@
 /*   By: aclakhda <aclakhda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 00:00:00 by aclakhda          #+#    #+#             */
-/*   Updated: 2025/09/23 13:17:51 by aclakhda         ###   ########.fr       */
+/*   Updated: 2025/10/18 21:04:19 by aclakhda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,16 @@
 #include <string>
 #include <vector>
 
-
+class Client
+{
+	private:
+		int				fd;
+		std::string		nickname;
+		std::string		username;
+		std::string		realname;
+		bool			registered;
+	public:
+		std::string		buffer;
+};
 
 #endif
