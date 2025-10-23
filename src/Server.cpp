@@ -6,7 +6,7 @@
 /*   By: aclakhda <aclakhda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 00:00:00 by aclakhda          #+#    #+#             */
-/*   Updated: 2025/10/18 23:04:24 by aclakhda         ###   ########.fr       */
+/*   Updated: 2025/10/23 22:57:38 by aclakhda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ void	Server::run()
 	char buffer[1024] = {0};//tmp for testing
 	int run = 1;
 
-	while (run)
+	while (run) // should stop when recieving a ctr+c / ctr+'\' note!
 	{
 		int poll_count = poll(&this->fds[0], this->fds.size(), -1);
 		if (poll_count == -1)
@@ -100,9 +100,11 @@ void	Server::run()
 
 int Server::recv_data(int client_fd, int i) //recv msg end with \n\r -> send to the parser
 {
-	char buffer[BUFFER_SIZE + 1];
+	std::cout << "Receiving data from client FD " << client_fd << std::endl;
+	char buffer[1024];
+	memset(buffer, 0, sizeof(buffer));
 	ssize_t pos = 0;
-	ssize_t bytes_received = recv(client_fd, buffer, BUFFER_SIZE, 0);
+	ssize_t bytes_received = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
 	if (bytes_received < 0)
 	{
 		std::cerr << "Error: recv failed for client FD " << client_fd << std::endl;
@@ -119,17 +121,32 @@ int Server::recv_data(int client_fd, int i) //recv msg end with \n\r -> send to 
 	buffer[bytes_received] = '\0';
 	clients[client_fd].buffer.append(buffer, bytes_received); // zid parti dyal recv all msg and parse it
 	std::cout << "Received from FD " << client_fd << ": " << clients[client_fd].buffer << std::endl;
-	std::cout << "here1" << std::endl;
-	// for (ssize_t j = 0; j < bytes_received; j++)
-	// 	std::cout << "[" << (int)buffer[j] << "] ";
-	// std::cout << std::endl;
-	while ((pos = clients[client_fd].buffer.find("\r\n")) != std::string::npos)
+	while ((pos = clients[client_fd].buffer.find("\n")) != std::string::npos)
 	{
-		std::cout << "here2" << std::endl;
+		// std::cout << "here2" << std::endl;
 		std::string message = clients[client_fd].buffer.substr(0, pos);
 		std::cout << "Parsed message from FD " << client_fd << ": " << message << std::endl;
-		clients[client_fd].buffer.erase(0, pos + 2);
+		clients[client_fd].buffer.erase(0, pos + 1);
+		std::string reply = "Message received: " + message + "\n";
 		// parse_message(message);
+		// this->send_data(client_fd, reply);
 	}
 	return 1;
+}
+
+int Server::send_data(int client_fd, std::string &message)
+{
+	ssize_t total_sent = 0;
+	ssize_t message_length = message.length();
+	while (total_sent < message_length)
+	{
+		ssize_t bytes_sent = send(client_fd, message.c_str() + total_sent, message_length - total_sent, 0);
+		if (bytes_sent < 0)
+		{
+			std::cerr << "Error: send failed for client FD " << client_fd << std::endl;
+			return -1;
+		}
+		total_sent += bytes_sent;
+	}
+	return total_sent;
 }

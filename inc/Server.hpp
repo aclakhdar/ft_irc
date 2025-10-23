@@ -6,7 +6,7 @@
 /*   By: aclakhda <aclakhda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 00:00:00 by aclakhda          #+#    #+#             */
-/*   Updated: 2025/10/18 21:05:26 by aclakhda         ###   ########.fr       */
+/*   Updated: 2025/10/20 21:52:22 by aclakhda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ class Server
 		struct sockaddr_in				server_addr;
 	private:
 		int	recv_data(int client_fd, int i);
+		int	send_data(int client_fd, std::string &message);
 	public:
 		Server(int port, const std::string& password);
 		~Server();
