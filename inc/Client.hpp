@@ -6,7 +6,7 @@
 /*   By: aclakhda <aclakhda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 00:00:00 by aclakhda          #+#    #+#             */
-/*   Updated: 2025/10/18 21:04:19 by aclakhda         ###   ########.fr       */
+/*   Updated: 2025/11/07 21:46:14 by aclakhda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 
 class Client
 {
-	private:
+	public:
 		int				fd;
 		std::string		nickname;
 		std::string		username;

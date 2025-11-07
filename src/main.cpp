@@ -6,7 +6,7 @@
 /*   By: aclakhda <aclakhda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 00:00:00 by aclakhda          #+#    #+#             */
-/*   Updated: 2025/10/17 20:53:59 by aclakhda         ###   ########.fr       */
+/*   Updated: 2025/11/07 21:01:16 by aclakhda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,14 @@ int main(int ac, char** av)
 	// server_poll.events = POLLIN;
 	// fds.push_back(server_poll);
 
-	Server server(port, password);
-	server.run();
+	try
+	{
+		Server server(port, password);
+		server.run();
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+	}
+
 }

@@ -6,7 +6,7 @@
 /*   By: aclakhda <aclakhda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 00:00:00 by aclakhda          #+#    #+#             */
-/*   Updated: 2025/10/23 22:57:38 by aclakhda         ###   ########.fr       */
+/*   Updated: 2025/11/07 21:48:55 by aclakhda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,27 @@ Server::Server(int port, const std::string& password)
 
 Server::~Server()
 {
+}
+
+void Server::handle_new_client(int client_fd)
+{
+	int new_client_fd = accept(this->server_fd, NULL, NULL); //change
+	if (new_client_fd == -1)
+	{
+		std::cerr << "Error: accept failed." << std::endl;
+		throw std::runtime_error("Accept failed");
+	}
+	pollfd new_poll;
+	new_poll.fd = new_client_fd;
+	new_poll.events = POLLIN;
+	new_poll.revents = 0;
+	this->fds.push_back(new_poll);
+	std::cout << "New client connected: FD " << new_client_fd << std::endl;
+}
+
+bool Server::is_new_client(int client_fd)
+{
+	return client_fd == this->server_fd;
 }
 
 void	Server::run()
@@ -68,21 +89,8 @@ void	Server::run()
 		{
 			if (this->fds[i].revents & POLLIN)
 			{
-				if (this->fds[i].fd == this->server_fd)
-				{
-					int new_client_fd = accept(this->server_fd, NULL, NULL); //change
-					if (new_client_fd == -1)
-					{
-						std::cerr << "Error: accept failed." << std::endl;
-						continue;
-					}
-					pollfd new_poll;
-					new_poll.fd = new_client_fd;
-					new_poll.events = POLLIN;
-					new_poll.revents = 0;
-					this->fds.push_back(new_poll);
-					std::cout << "New client connected: FD " << new_client_fd << std::endl;
-				}
+				if (is_new_client(this->fds[i].fd))
+					this->handle_new_client(this->fds[i].fd);
 				else
 				{
 					int client_fd = this->fds[i].fd;
