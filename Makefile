@@ -3,16 +3,16 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: aclakhda <aclakhda@student.42.fr>          +#+  +:+       +#+         #
+#    By: tassadin <tassadin@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/09/23 00:00:00 by aclakhda          #+#    #+#              #
-#    Updated: 2025/10/17 21:00:09 by aclakhda         ###   ########.fr        #
+#    Updated: 2025/11/20 20:10:37 by tassadin         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 SRC = src/main.cpp \
 	src/Server.cpp \
-	#   src/Client.cpp \
+	src/Client.cpp \
 	#   src/Channel.cpp \
 	#   src/Commands.cpp \
 	#   src/Utils.cpp

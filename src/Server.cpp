@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aclakhda <aclakhda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tassadin <tassadin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 00:00:00 by aclakhda          #+#    #+#             */
-/*   Updated: 2025/10/23 22:57:38 by aclakhda         ###   ########.fr       */
+/*   Updated: 2025/11/22 12:43:15 by tassadin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Server.hpp"
-
+#include "../inc/Client.hpp"
 Server::Server(int port, const std::string& password)
 {
 	this->port = port;
@@ -20,6 +20,73 @@ Server::Server(int port, const std::string& password)
 
 Server::~Server()
 {
+}
+static std::string trim_copy(const std::string &s)
+{
+    size_t first = s.find_first_not_of(" \t\r\n");
+    if (first == std::string::npos)
+        return "";
+    size_t last = s.find_last_not_of(" \t\r\n");
+    return s.substr(first, last - first + 1);
+}
+void Server::parse_cmd(std::string cmd)
+{
+    command = "";
+    args = "";
+	cmd = trim_copy(cmd);
+    size_t space = cmd.find(' ');
+    if (space == std::string::npos)
+    {
+        command = cmd;
+    }
+    else
+    {
+        command = cmd.substr(0, space);
+        args = trim_copy(cmd.substr(space + 1));
+		std::cout << args << std::endl;
+	}
+}
+void Server::processCommand(Client &client, const std::string &cmd)
+{
+
+    parse_cmd(cmd);
+	std::cout << command << " : "  << args <<  ";received from :" << client.getFd() << std::endl;
+    
+	
+    if (command == "PING")
+    {
+        std::string msg = "PONG TEST \n";
+       this->send_data(client.getFd(), msg);
+        std::cout << "Sent PONG message to client\n";
+    }
+    else if (command == "CAP")
+    {
+        std::string msg = "CAP * ACK :\n";
+         this->send_data(client.getFd(), msg);
+        std::cout << "CAP negotiation handled\n";
+    }
+    // else if (command == "PASS" || command == "NICK" || command == "USER")
+    // {
+    //     if (command == "PASS")
+           
+    //     // else if (command == "NICK")
+           
+    //     // else if (command == "USER")
+            
+    // }
+    // else if (client.isRegistred())
+    // {
+    //     channel_cmd(client, cmd);
+    // }
+    // else
+    // {
+    //     std::string msg = RED "Invalid command\n" RESET;if (space == std::string::npos)
+    //     send(client.getFd(), msg.c_str(), msg.size(), 0);
+    // }
+}
+
+void Server::parseMessage(std::string msg,int index){
+		processCommand(clients[index],msg);
 }
 
 void	Server::run()
@@ -30,6 +97,21 @@ void	Server::run()
 		std::cerr << "Error: Failed to create socket." << std::endl;
 		exit(EXIT_FAILURE);
 	}
+	int opt = 1;
+    if (setsockopt(this->server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+    {
+        std::perror("setsockopt(SO_REUSEADDR) failed");
+        close(this->server_fd);
+        exit(EXIT_FAILURE);
+    }
+    #ifdef SO_REUSEPORT
+    // optional: on some systems allows multiple sockets to bind same port (careful)
+    if (setsockopt(this->server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) == -1)
+    {
+        std::perror("setsockopt(SO_REUSEPORT) failed");
+        // non-fatal on systems that don't support it; continue
+    }
+    #endif
 	this->server_addr.sin_family = AF_INET;
 	this->server_addr.sin_addr.s_addr = INADDR_ANY;
 	this->server_addr.sin_port = htons(port);
@@ -121,6 +203,7 @@ int Server::recv_data(int client_fd, int i) //recv msg end with \n\r -> send to 
 	buffer[bytes_received] = '\0';
 	clients[client_fd].buffer.append(buffer, bytes_received); // zid parti dyal recv all msg and parse it
 	std::cout << "Received from FD " << client_fd << ": " << clients[client_fd].buffer << std::endl;
+	clients[client_fd].setFd(client_fd);
 	while ((pos = clients[client_fd].buffer.find("\n")) != std::string::npos)
 	{
 		// std::cout << "here2" << std::endl;
@@ -128,12 +211,11 @@ int Server::recv_data(int client_fd, int i) //recv msg end with \n\r -> send to 
 		std::cout << "Parsed message from FD " << client_fd << ": " << message << std::endl;
 		clients[client_fd].buffer.erase(0, pos + 1);
 		std::string reply = "Message received: " + message + "\n";
-		// parse_message(message);
-		// this->send_data(client_fd, reply);
+		parseMessage(message, client_fd);
+		this->send_data(client_fd, reply);
 	}
 	return 1;
 }
-
 int Server::send_data(int client_fd, std::string &message)
 {
 	ssize_t total_sent = 0;

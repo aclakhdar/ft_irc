@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aclakhda <aclakhda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tassadin <tassadin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 00:00:00 by aclakhda          #+#    #+#             */
-/*   Updated: 2025/10/20 21:52:22 by aclakhda         ###   ########.fr       */
+/*   Updated: 2025/11/22 13:01:42 by tassadin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ class Server
 		std::map<int, Client>			clients; // fd -> cleint
 		// std::map<std::string, Channel>	channels;
 		struct sockaddr_in				server_addr;
+		std::string command;
+    	std::string args;
 	private:
 		int	recv_data(int client_fd, int i);
 		int	send_data(int client_fd, std::string &message);
@@ -57,6 +59,9 @@ class Server
 		Server(int port, const std::string& password);
 		~Server();
 		void	run();
+		void parseMessage(std::string msg, int index);
+		void processCommand(Client &client, const std::string &cmd);
+		void parse_cmd(std::string cmd);
 };
 
 

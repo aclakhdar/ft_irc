@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aclakhda <aclakhda@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tassadin <tassadin@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 00:00:00 by aclakhda          #+#    #+#             */
-/*   Updated: 2025/10/18 21:04:19 by aclakhda         ###   ########.fr       */
+/*   Updated: 2025/11/21 16:31:53 by tassadin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,10 @@ class Client
 		bool			registered;
 	public:
 		std::string		buffer;
+		std::string extractCommand();
+		
+		int getFd();
+		void setFd(int fd);
 };
 
 #endif
