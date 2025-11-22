@@ -1,0 +1,27 @@
+
+001		RPL_WELCOME	Sent after both NICK and USER are received. Welcomes the client.
+002		RPL_YOURHOST	Optional — info about the server.
+003		RPL_CREATED	Optional — tells when the server was created.
+004		RPL_MYINFO	Optional — server version and available modes.
+005		RPL_BOUNCE	Optional — server supports these features.
+375		RPL_MOTDSTART	Start of the MOTD (message of the day).
+372		RPL_MOTD	One or more lines of MOTD text.
+376		RPL_ENDOFMOTD	End of the MOTD.
+		PING / PONG	Not numeric, but mandatory for keep-alive.
+
+
+Error replies you’ll likely need:
+
+401		ERR_NOSUCHNICK		Tried to message a user that doesn’t exist.
+403		ERR_NOSUCHCHANNEL	Tried to join or send to a channel that doesn’t exist.
+404		ERR_CANNOTSENDTOCHAN	Tried to message a channel without permission.
+431		ERR_NONICKNAMEGIVEN	Sent NICK command with no nickname.
+432		ERR_ERRONEUSNICKNAME	Nickname is invalid.
+433		ERR_NICKNAMEINUSE	Nickname already taken.
+451		ERR_NOTREGISTERED	Tried to send a command before USER/NICK finished.
+461		ERR_NEEDMOREPARAMS	Command missing parameters.
+462		ERR_ALREADYREGISTRED	Tried to register twice.
+464		ERR_PASSWDMISMATCH	Wrong password (if you implement PASS).
+482		ERR_CHANOPRIVSNEEDED	Tried to do something reserved for channel operators.
+501		ERR_UMODEUNKNOWNFLAG	Invalid user mode.
+502		ERR_USERSDONTMATCH	Tried to change mode of someone else.

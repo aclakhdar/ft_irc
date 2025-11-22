@@ -6,11 +6,13 @@
 /*   By: aclakhda <aclakhda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 00:00:00 by aclakhda          #+#    #+#             */
-/*   Updated: 2025/11/07 21:48:55 by aclakhda         ###   ########.fr       */
+/*   Updated: 2025/11/22 21:42:18 by aclakhda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../inc/Server.hpp"
+
+void	set_user(int client_fd, const std::string& message, std::map<int, Client>& clients);//tmp
 
 Server::Server(int port, const std::string& password)
 {
@@ -35,7 +37,16 @@ void Server::handle_new_client(int client_fd)
 	new_poll.events = POLLIN;
 	new_poll.revents = 0;
 	this->fds.push_back(new_poll);
-	std::cout << "New client connected: FD " << new_client_fd << std::endl;
+	// std::cout << "New client connected: FD " << new_client_fd << std::endl;
+}
+
+void Server::remove_client(int client_fd, size_t i)
+{
+	shutdown(client_fd, SHUT_RDWR);
+	close(client_fd);
+	this->clients.erase(client_fd);
+	this->fds.erase(this->fds.begin() + i);
+	std::cout << "Client disconnected: FD " << client_fd << std::endl;
 }
 
 bool Server::is_new_client(int client_fd)
@@ -95,8 +106,10 @@ void	Server::run()
 				{
 					int client_fd = this->fds[i].fd;
 					int result = this->recv_data(client_fd, i);
-					if (result == 0)
+					if (result == RECV_ERROR)
 						run = 0;
+					else if (result == CLIENT_DISCONNECT)
+						--i;
 				}
 			}
 		}
@@ -108,7 +121,7 @@ void	Server::run()
 
 int Server::recv_data(int client_fd, int i) //recv msg end with \n\r -> send to the parser
 {
-	std::cout << "Receiving data from client FD " << client_fd << std::endl;
+	// std::cout << "Receiving data from client FD " << client_fd << std::endl;
 	char buffer[1024];
 	memset(buffer, 0, sizeof(buffer));
 	ssize_t pos = 0;
@@ -116,30 +129,50 @@ int Server::recv_data(int client_fd, int i) //recv msg end with \n\r -> send to 
 	if (bytes_received < 0)
 	{
 		std::cerr << "Error: recv failed for client FD " << client_fd << std::endl;
-		return 0;
+		return RECV_ERROR;
 	}
 	else if (bytes_received == 0)
 	{
-		std::cout << "Client disconnected: FD " << client_fd << std::endl;
-		close(client_fd);
-		this->clients.erase(client_fd);
-		this->fds.erase(this->fds.begin() + i);
-		return 1;
+		this->remove_client(client_fd, i);
+		return CLIENT_DISCONNECT;
 	}
 	buffer[bytes_received] = '\0';
 	clients[client_fd].buffer.append(buffer, bytes_received); // zid parti dyal recv all msg and parse it
-	std::cout << "Received from FD " << client_fd << ": " << clients[client_fd].buffer << std::endl;
+	// std::cout << "Received from FD " << client_fd << ": " << clients[client_fd].buffer << std::endl;
 	while ((pos = clients[client_fd].buffer.find("\n")) != std::string::npos)
 	{
-		// std::cout << "here2" << std::endl;
 		std::string message = clients[client_fd].buffer.substr(0, pos);
 		std::cout << "Parsed message from FD " << client_fd << ": " << message << std::endl;
 		clients[client_fd].buffer.erase(0, pos + 1);
 		std::string reply = "Message received: " + message + "\n";
+		set_user(client_fd, message, clients); //tmp
 		// parse_message(message);
-		// this->send_data(client_fd, reply);
+		this->send_data(client_fd, reply);
 	}
-	return 1;
+	return 0;
+}
+
+void	set_user(int client_fd, const std::string& message, std::map<int, Client>& clients) //tmp function to test send and recv
+{
+	std::istringstream iss(message);
+	std::string command;
+	iss >> command;
+	//ignore CAP LS 302
+	std::cout << "Command: " << command << std::endl;
+	if (command == "NICK")
+	{
+		std::string nickname;
+		iss >> nickname;
+		clients[client_fd].nickname = nickname;
+		std::cout << "Setting nickname for FD " << client_fd << " to " << nickname << std::endl;
+	}
+	else if (command == "USER")
+	{
+		std::string username;
+		iss >> username;
+		clients[client_fd].username = username;
+		std::cout << "Setting username for FD " << client_fd << " to " << username << std::endl;
+	}
 }
 
 int Server::send_data(int client_fd, std::string &message)

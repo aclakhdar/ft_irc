@@ -6,7 +6,7 @@
 /*   By: aclakhda <aclakhda@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/23 00:00:00 by aclakhda          #+#    #+#             */
-/*   Updated: 2025/11/07 21:43:45 by aclakhda         ###   ########.fr       */
+/*   Updated: 2025/11/22 21:40:48 by aclakhda         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@
 
 #define MAX_CLIENTS 100
 #define BUFFER_SIZE 512
+#define CLIENT_DISCONNECT 1
+#define RECV_ERROR -1
 
 
 class Server
@@ -56,6 +58,7 @@ class Server
 		int	send_data(int client_fd, std::string &message);
 		bool	is_new_client(int client_fd);
 		void	handle_new_client(int client_fd);
+		void	remove_client(int client_fd, size_t i);
 	public:
 		Server(int port, const std::string& password);
 		~Server();
